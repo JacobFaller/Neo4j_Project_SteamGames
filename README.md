@@ -27,15 +27,11 @@ Full Documentation
 
 **📁 Dataset Overview**
 
-Source
-
-Kaggle: Steam Games Dataset (Author: Martin Bustos)
-
-Repository data: see data/ folder and links in this README.
+<ins>Source:</ins> Kaggle - Steam Games Dataset (Author: Martin Bustos)
 
 Due to file size constraints, the original CSV was split into two UTF-8 encoded parts before import.
 
-Retained columns (graph-relevant features):
+<ins>Retained columns (graph-relevant features):</ins>
 
 Name (primary entity)
 
@@ -67,10 +63,11 @@ Genres
 
 Tags
 
-Several other columns were deliberately removed because they primarily featured cumulative, non-relational values that added little to graph reasoning and increased storage and processing overhead.
+Several other columns were *deliberately* removed because they primarily featured cumulative, non-relational values that added little to graph reasoning and increased storage and processing overhead.
 
 **🗂️ Graph Data Model**
-Node Labels
+
+<ins>Node Labels</ins>
 
 Game
 
@@ -88,7 +85,7 @@ Tag
 
 Platform (Windows/Mac/Linux)
 
-Relationship Types
+<ins>Relationship Types</ins>
 
 (:Game)-[:PUBLISHED_BY]->(:Publisher)
 
@@ -128,29 +125,29 @@ Dataset reduction
 
 Remove games with zero recommendations (and, in an earlier step, games with both zero recommendations and zero rating).
 
-This reduced the graph from ~60k games and ~400k relationships to roughly:
+This reduced the graph from ~60k games and far more than ~400k relationships to roughly:
 
 ~13k Game nodes
 
-~93k–230k relationships (depending on stage).
+~400k relationships
 
-Relationship rebuilds
+<ins>Relationship rebuilds</ins>
 
 For each relationship type (e.g. Publisher, Developer, Genre, Category, Language, Tag), run a dedicated LOAD CSV + SPLIT + UNWIND import.
 
 Arrays such as Supported languages required additional cleaning (e.g. stripping brackets and quotes) before splitting.
 
-Tag relationships and AuraDB limit
+<ins>Tag relationships and AuraDB limit</ins>
 
 Tag relationships were imported last, as they generate a large number of edges.
 
-The free-tier limit of 400k relationships was almost reached; only a small remainder of tag relationships exceeded the limit, which is acceptable for the project’s learning-oriented scope.
+The free-tier limit of 400k relationships was essentially reached; only a small remainder of tag relationships exceeded the limit, which is acceptable for the project’s learning-oriented scope.
 
 **STILL IN PROGRESS --> 🌐 Web Application Architecture**
 
 The web application is intentionally minimal:
 
-Backend
+<u>Backend</u>
 
 Language: Python
 
@@ -158,7 +155,7 @@ Framework: Flask
 
 Database driver: Official neo4j Python driver
 
-Responsibilities:
+<ins>Responsibilities:</ins>
 
 Manage a shared Neo4j driver/session.
 
@@ -166,13 +163,13 @@ Expose HTTP endpoints such as /api/games-by-tag, /api/games-by-publisher, etc.
 
 Return JSON suitable for both table and graph visualizations.
 
-Frontend
+<ins>Frontend</ins>
 
 Stack: Plain HTML, CSS, and vanilla JavaScript (Fetch API).
 
-UI concept:
+<ins>UI concept:</ins>
 
-Single-page layout with ~5 “query cards”.
+Single-page layout with ~5 “query cards” (pre-selected query statements).
 
 Each card includes:
 
@@ -226,100 +223,12 @@ Output: earliest and latest game per genre by release date.
 
 **STILL IN PROGRESS --> 📁 Project Structure**
 
-A minimal, suggested project layout:
-
-Neo4j_Project_SteamGames/
-├─ data/
-│  ├─ SteamGames_part_1_UTF8.csv
-│  ├─ SteamGames_part_2_UTF8.csv
-│  └─ (optional) raw/          # original files or backup
-├─ docs/
-│  └─ steam_games_graph_schema.png   # exported schema diagram
-├─ backend/
-│  ├─ app.py                         # Flask entrypoint
-│  ├─ neo4j_client.py                # driver/session helper
-│  ├─ queries.py                     # central Cypher query definitions
-│  └─ config_example.py              # template for connection settings
-├─ frontend/
-│  ├─ index.html
-│  ├─ styles.css
-│  └─ main.js
-├─ cypher/
-│  ├─ import_games.cypher
-│  ├─ import_relationships.cypher
-│  └─ analysis_queries.cypher
-├─ README.md
-└─ requirements.txt
-
-
-You can of course adapt filenames and folders to your preferred structure.
 
 **STILL IN PROGRESS --> 🚀 Quick Start**
 
-The exact steps depend on how you structure the code, but a typical setup looks like this:
-
-Clone the repository
-
-git clone https://github.com/JacobFaller/Neo4j_Project_SteamGames.git
-cd Neo4j_Project_SteamGames
-
-
-Create and activate a virtual environment
-
-python -m venv .venv
-source .venv/bin/activate      # on Windows: .venv\Scripts\activate
-
-
-Install dependencies
-
-pip install -r requirements.txt
-
-
-requirements.txt will typically include:
-
-Flask
-neo4j
-
-
-Configure Neo4j connection
-
-Create backend/config.py (from config_example.py) with your AuraDB connection details:
-
-NEO4J_URI = "neo4j+s://<your-instance-id>.databases.neo4j.io"
-NEO4J_USER = "neo4j"
-NEO4J_PASSWORD = "<your-password>"
-NEO4J_DATABASE = "neo4j"  # or your custom DB name
-
-
-Run the Flask backend
-
-cd backend
-python app.py
-
-
-Open the frontend
-
-Option A: serve frontend/ via a simple static server, or
-
-Option B: reference the Flask backend from frontend/main.js (e.g. fetch("http://localhost:5000/api/games-by-tag")), then open frontend/index.html in your browser.
 
 **STILL IN PROGRESS --> 📊 Graph Visualization (via WebApp)**
 
-For at least one query, the frontend will render a graph visualization of the result set.
-
-Planned library: Neovis.js
-
-Neo4j-focused wrapper around vis.js.
-
-Accepts Cypher and renders nodes/edges with minimal configuration.
-
-Ideal for quickly turning query results into an interactive network.
-
-Alternative options (if needed):
-
-Cytoscape.js (general-purpose, rich layouts)
-
-D3.js force-directed graphs (very flexible but more verbose)
 
 **📖 Full Documentation**
 
