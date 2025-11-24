@@ -29,7 +29,8 @@ Full Documentation
 
 <ins>Source:</ins> Kaggle - Steam Games Dataset (Author: Martin Bustos)
 
-Due to file size constraints, the original CSV was split into two UTF-8 encoded parts before import.
+Due to file size constraints, the original CSV was split into two UTF-8 encoded parts before import. 
+*NOTE: Only a subset of the "SteamGames_part_1_UTF8.csv" file contents is used. After the import of this, the Aura Free constraints had been reached already, preventin the use of the second file ("SteamGames_part_2.csv").*
 
 <ins>Retained columns (graph-relevant features):</ins>
 
@@ -111,7 +112,7 @@ A high-level schema visualization is included in the repository:
 
 | Game Node Title | Game Node Attribute | Game Node Attribute | Game Node Attribute | Game Node Attribute | Game Node Attribute | Game Node Attribute | Game Node Attribute | SUPPORTS LANGUAGE | SUPPORTS PLATFORM | SUPPORTS PLATFORM | SUPPORTS PLATFORM | DEVELOPED BY | PUBLISHED BY | HAS CATEGORY | HAS GENRE | HAS TAG |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| Name (Primary Entity) | AppID | Release date | Price | Discount | Rating Score (Wilson score interval lower bound) | Achievements | Recommendations | Supported languages | Windows | Mac | Linux | Developers | Publishers | Categories | Genres | Tags |
+| Name (Primary Entity) | AppID | Release date | Price | Discount | Rating | Achievements | Recommendations | Supported languages | Windows | Mac | Linux | Developers | Publishers | Categories | Genres | Tags |
 
 **⚙️ Import Pipeline (High-Level)**
 
