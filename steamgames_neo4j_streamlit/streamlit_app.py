@@ -18,13 +18,130 @@ st.set_page_config(
     layout="wide",
 )
 
+OPTIONS = [
+    "Home",
+    "Q1 – Games by Tag (table)",
+    "Q2 – Games by Publisher (table)",
+    "Q3 – Genre Distribution (chart)",
+    "Q4 – Avg Price & Rating per Tag (chart)",
+    "Q5 – Games per Release Year (chart)",
+    "Q6 – Game Neighborhood (graph)",
+    "Q7 – Similar Games via Shared Tags (graph)",
+    "Q8 – Publisher–Genre Subgraph (graph)",
+]
 
-st.set_page_config(page_title="Steam Games Graph Explorer", layout="wide")
-st.title("Steam Games Graph Explorer")
+# ---------- get current view from URL ----------
+params = st.query_params
+current_view = params.get("view", "Home")  # <- no list, no [0]
 
-query = st.sidebar.radio(
-    "Select a query",
-    [
+if current_view not in OPTIONS:
+    current_view = "Home"
+
+
+# ---------- sidebar ----------
+st.sidebar.markdown(
+    "<h2 style='font-weight:700; font-size:22px; margin-bottom: 0.5rem;'>📌 Navigation</h2>",
+    unsafe_allow_html=True,
+)
+
+st.markdown(
+    """
+    <style>
+    div[data-testid="stSidebar"] div[role="radiogroup"] > label {
+        display: flex;
+        align-items: center;
+        height: 48px;
+        padding: 4px 0;
+        margin-bottom: 4px;
+        line-height: 1.2rem !important;
+        white-space: normal !important;
+    }
+    div[data-testid="stSidebar"] div[role="radiogroup"] > label p {
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+
+sidebar_choice = st.sidebar.radio(
+    "",
+    OPTIONS,
+    index=OPTIONS.index(current_view),
+)
+
+if sidebar_choice != current_view:
+    current_view = sidebar_choice
+    st.query_params["view"] = current_view
+
+# ---------- HOME PAGE ----------
+if current_view == "Home":
+    st.title("Steam Games Graph Explorer")
+
+    st.write(
+        """
+        This application demonstrates the use of a Neo4j AuraDB graph database to analyze and visualize 
+        structural patterns in the Steam games ecosystem.  
+        
+        It exposes **eight predefined Cypher queries** that highlight:
+        - table-based analytics
+        - statistical charts
+        - interactive graph visualizations (neighborhoods, similarity clusters, publisher–genre subgraphs)  
+
+        Use the sidebar to select a query, or choose one of the tiles below.
+        """
+    )
+
+    st.markdown("---")
+    st.subheader("Available Queries")
+
+    # style card-like buttons
+    # style card-like buttons (title + description inside)
+    st.markdown(
+        """
+        <style>
+        /* Outer wrapper for each tile */
+        div.tile-button {
+            height: 80px !important;           /* tile height */
+            margin-bottom: 8px !important;     /* small row gap */
+        }
+
+        /* Style the Streamlit button as a compact card */
+        div.tile-button > button {
+            background-color: #1f1f1f !important;
+            border-radius: 16px !important;
+            border: 1px solid #333 !important;
+            padding: 8px 12px !important;
+
+            width: 100% !important;
+            height: 100% !important;
+
+            text-align: center !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+
+            cursor: pointer !important;
+            font-size: 0.95rem !important;
+            font-weight: 600 !important;
+
+            transition: background-color 0.15s ease, transform 0.15s ease !important;
+        }
+
+        div.tile-button > button:hover {
+            background-color: #262626 !important;
+            transform: translateY(-2px) !important;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
+    cols = st.columns(3)
+
+    tiles = [
         "Q1 – Games by Tag (table)",
         "Q2 – Games by Publisher (table)",
         "Q3 – Genre Distribution (chart)",
@@ -33,12 +150,27 @@ query = st.sidebar.radio(
         "Q6 – Game Neighborhood (graph)",
         "Q7 – Similar Games via Shared Tags (graph)",
         "Q8 – Publisher–Genre Subgraph (graph)",
-    ],
-)
+    ]
 
+
+    for i, label in enumerate(tiles):
+        col = cols[i % 3]
+        with col:
+            st.markdown('<div class="tile-button">', unsafe_allow_html=True)
+
+            # show a short, clean title on the tile
+            short_title = label.split("(", 1)[0].strip()  # e.g. "Q1 – Games by Tag"
+
+            if st.button(short_title, key=f"tile_{i}", use_container_width=True):
+                st.query_params["view"] = label
+                st.rerun()
+
+            st.markdown("</div>", unsafe_allow_html=True)
+
+    st.stop()
 # ---------------- TABLE QUERIES ----------------
 
-if query.startswith("Q1"):
+if current_view.startswith("Q1"):
     st.header("Q1 – Game Neighborhood (graph)")
     st.write("Displays a ranked list of games associated with a selected tag, including their release year, price, rating, and popularity.")
     tag = st.text_input("Tag name", "Adventure")
@@ -46,7 +178,7 @@ if query.startswith("Q1"):
         df = q1_games_by_tag(tag)
         st.dataframe(df, use_container_width=True)
 
-elif query.startswith("Q2"):
+elif current_view.startswith("Q2"):
     st.header("Q2 – Games by Publisher")
     st.write("Retrieves all games published by a chosen publisher and summarizes their pricing, ratings, and tagging breadth.")
     pub = st.text_input("Publisher", "Valve")
@@ -56,7 +188,7 @@ elif query.startswith("Q2"):
 
 # ---------------- CHART QUERIES ----------------
 
-elif query.startswith("Q3"):
+elif current_view.startswith("Q3"):
     st.header("Q3 – Genre Distribution")
     st.write("Visualizes the distribution of games across genres to highlight which genres are most prevalent in the dataset.")
     if st.button("Run"):
@@ -66,7 +198,7 @@ elif query.startswith("Q3"):
         fig = px.bar(df, x="genre", y="gameCount", title="Games Per Genre")
         st.plotly_chart(fig, use_container_width=True)
 
-elif query.startswith("Q4"):
+elif current_view.startswith("Q4"):
     st.header("Q4 – Avg Price & Rating per Tag")
     st.write("Aggregates games by tag to compare average prices, average ratings, and tag popularity.")
     min_games = st.slider("Minimum games", 5, 100, 20)
@@ -84,7 +216,7 @@ elif query.startswith("Q4"):
         )
         st.plotly_chart(fig, use_container_width=True)
 
-elif query.startswith("Q5"):
+elif current_view.startswith("Q5"):
     st.header("Q5 – Games per Release Year")
     st.write("Analyzes temporal trends by plotting the number of games released per year within a chosen time interval.")
     col1, col2 = st.columns(2)
@@ -111,7 +243,7 @@ elif query.startswith("Q5"):
 
 # ---------------- GRAPH QUERIES ----------------
 
-elif query.startswith("Q6"):
+elif current_view.startswith("Q6"):
     st.header("Q6 – Game Neighborhood (graph)")
     st.write("Shows the immediate semantic neighborhood of a selected game, including its publishers, developers, genres, tags, and supported languages.")
     game_name = st.text_input("Game name", "Portal 2")
@@ -129,10 +261,18 @@ elif query.startswith("Q6"):
             if fig is None:
                 st.warning("Graph is empty.")
             else:
-                st.plotly_chart(fig, use_container_width=True)
+                st.plotly_chart(
+                    fig,
+                    use_container_width=True,
+                    config={
+                        "scrollZoom": True,   # enables wheel & pinch zoom
+                        "displayModeBar": True,
+                        "dragmode": "pan"     # ← makes dragging move the graph
+                    }
+                )
 
 
-elif query.startswith("Q7"):
+elif current_view.startswith("Q7"):
     st.header("Q7 – Similar Games via Shared Tags (graph)")
     st.write("Identifies and visualizes games that share multiple tags with the selected title, revealing clusters of related gameplay or thematic elements.")
     game_name = st.text_input("Game name", "Portal 2")
@@ -151,10 +291,18 @@ elif query.startswith("Q7"):
             if fig is None:
                 st.warning("Graph is empty.")
             else:
-                st.plotly_chart(fig, use_container_width=True)
+                st.plotly_chart(
+                    fig,
+                    use_container_width=True,
+                    config={
+                        "scrollZoom": True,   # enables wheel & pinch zoom
+                        "displayModeBar": True,
+                        "dragmode": "pan"     # ← makes dragging move the graph
+                    }
+                )
 
 
-elif query.startswith("Q8"):
+elif current_view.startswith("Q8"):
     st.header("Q8 – Publisher–Genre Subgraph (graph)")
     st.write("Illustrates how a publisher's catalog spans across genres by linking each genre to representative high-rated games.")
     pub_name = st.text_input("Publisher name", "Valve")
@@ -172,6 +320,12 @@ elif query.startswith("Q8"):
             if fig is None:
                 st.warning("Graph is empty.")
             else:
-                st.plotly_chart(fig, use_container_width=True)
-
-
+                st.plotly_chart(
+                    fig,
+                    use_container_width=True,
+                    config={
+                        "scrollZoom": True,   # enables wheel & pinch zoom
+                        "displayModeBar": True,
+                        "dragmode": "pan"     # ← makes dragging move the graph
+                    }
+                )

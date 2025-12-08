@@ -146,7 +146,7 @@ def build_network_figure(records, node_keys, rel_keys, title="Graph", layout_mod
     else:
         pos = nx.spring_layout(G, seed=42)
 
- # ---------- Edges: highlight edges connected to the main game ----------
+    # ---------- Edges: highlight edges connected to the main game ----------
     primary_nodes = [n for n, attrs in G.nodes(data=True) if attrs.get("role") == "g"]
 
     primary_edge_x = []
@@ -158,7 +158,6 @@ def build_network_figure(records, node_keys, rel_keys, title="Graph", layout_mod
         x0, y0 = pos[u]
         x1, y1 = pos[v]
 
-        # If either endpoint is the primary game → highlight
         if u in primary_nodes or v in primary_nodes:
             primary_edge_x += [x0, x1, None]
             primary_edge_y += [y0, y1, None]
@@ -166,25 +165,25 @@ def build_network_figure(records, node_keys, rel_keys, title="Graph", layout_mod
             other_edge_x += [x0, x1, None]
             other_edge_y += [y0, y1, None]
 
-    # Grey faint edges (normal ones)
     other_edge_trace = go.Scatter(
         x=other_edge_x,
         y=other_edge_y,
         mode="lines",
         hoverinfo="none",
         line=dict(width=1, color="rgba(180,180,180,0.4)"),
+        showlegend=False,
     )
 
-    # Highlighted edges (to the central game)
     primary_edge_trace = go.Scatter(
         x=primary_edge_x,
         y=primary_edge_y,
         mode="lines",
         hoverinfo="none",
-        line=dict(width=1, color="#00aaff"),  # light blue isch xD
+        line=dict(width=1.5, color="rgba(255, 220, 120, 0.6)"),
+        showlegend=False,
     )
 
-    # ---------- Nodes ----------
+    # ---------- Nodes: grouped traces so we get a legend ----------
     group_colors = {
         "Game": "#ffcc00",       # highlight games
         "Publisher": "#ff7f0e",
@@ -195,52 +194,74 @@ def build_network_figure(records, node_keys, rel_keys, title="Graph", layout_mod
     }
     default_color = "#1f77b4"
 
-    node_x = []
-    node_y = []
-    node_text = []
-    node_color = []
-    node_size = []
+    # group -> {x, y, text, hover, size}
+    grouped_nodes: dict[str, dict[str, list]] = {}
 
     for node_id, attrs in G.nodes(data=True):
         x, y = pos[node_id]
         group = attrs.get("group", "Other")
         label = attrs.get("label", str(node_id))
 
-        node_x.append(x)
-        node_y.append(y)
-        node_text.append(f"{group}: {label}")
-        node_color.append(group_colors.get(group, default_color))
+        if group not in grouped_nodes:
+            grouped_nodes[group] = {
+                "x": [],
+                "y": [],
+                "text": [],
+                "hover": [],
+                "size": [],
+            }
+
+        grouped_nodes[group]["x"].append(x)
+        grouped_nodes[group]["y"].append(y)
+        grouped_nodes[group]["text"].append(label)
+        grouped_nodes[group]["hover"].append(f"{group}: {label}")
 
         # Make Game nodes larger
         if group == "Game":
-            node_size.append(22)
+            grouped_nodes[group]["size"].append(22)
         else:
-            node_size.append(12)
+            grouped_nodes[group]["size"].append(12)
 
-    node_trace = go.Scatter(
-        x=node_x,
-        y=node_y,
-        mode="markers+text",
-        text=[t.split(": ", 1)[-1] for t in node_text],  # show only name
-        textposition="top center",
-        hovertext=node_text,
-        hoverinfo="text",
-        marker=dict(
-            size=node_size,
-            line=dict(width=1, color="rgba(255,255,255,0.7)"),
-            color=node_color,
-        ),
-    )
+    node_traces = []
+    for group, data in grouped_nodes.items():
+        color = group_colors.get(group, default_color)
+        node_traces.append(
+            go.Scatter(
+                x=data["x"],
+                y=data["y"],
+                mode="markers+text",
+                name=group,                 # <-- appears in legend
+                text=data["text"],
+                textposition="top center",
+                hovertext=data["hover"],
+                hoverinfo="text",
+                marker=dict(
+                    size=data["size"],
+                    line=dict(width=1, color="rgba(255,255,255,0.7)"),
+                    color=color,
+                ),
+                showlegend=True,
+            )
+        )
 
     fig = go.Figure(
-    data=[other_edge_trace, primary_edge_trace, node_trace],
-    layout=go.Layout(
-        title=title,
-        height=700,
-        showlegend=False,
-        margin=dict(l=10, r=10, b=10, t=40),
-        xaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
-        yaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
+        data=[other_edge_trace, primary_edge_trace, *node_traces],
+        layout=go.Layout(
+            title=title,
+            dragmode="pan",
+            height=700,
+            showlegend=True,
+            legend=dict(
+                orientation="h",
+                yanchor="top",
+                y=-0.15,            # push legend below the plot area
+                xanchor="center",
+                x=0.5,
+                font=dict(size=10),  # optional: slightly smaller text
+            ),
+            margin=dict(l=10, r=10, b=10, t=40),
+            xaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
+            yaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
         ),
     )
 
