@@ -1,40 +1,40 @@
 # Neo4j Steam Games Graph Project
 
-This project constructs and explores a graph database of Steam games using Neo4j AuraDB and a curated Kaggle dataset.
-A minimal web application (Python + Flask) exposes predefined Cypher queries and includes at least one graph visualization directly in the browser.
+This project constructs and explores a graph database of Steam games using Neo4j AuraDB and a curated subset of a Kaggle dataset. A lightweight Streamlit web application exposes eight predefined Cypher queries, providing both tabular analytics and interactive graph visualizations.
 
-The focus is on graph modelling, query design, and visualization, not on building a feature-complete production system.
+The focus of this work is graph modelling, import strategy, Cypher query design, and visual reasoning — not the development of a large-scale production system.
 
-**📚 Table of Contents**
+# 📚 Table of Contents
 
 Dataset Overview
 
 Graph Data Model
 
+Schema Diagram
+
 Import Pipeline
 
-Web Application Architecture
+Web Application
 
-Planned Cypher Queries
+Implemented Queries
+
+Graph Visualization Features
 
 Project Structure
 
 Quick Start
 
-Graph Visualization
-
 Full Documentation
 
-**📁 Dataset Overview**
+# 📁 Dataset Overview
 
-<ins>Source:</ins> Kaggle - Steam Games Dataset (Author: Martin Bustos)
+Source: Steam Games Dataset (Kaggle — Martin Bustos)
 
-Due to file size constraints, the original CSV was split into two UTF-8 encoded parts before import. 
-*NOTE: Only a subset of the "SteamGames_part_1_UTF8.csv" file contents is used. After the import of this, the Aura Free constraints had been reached already, preventin the use of the second file ("SteamGames_part_2.csv").*
+Due to AuraDB Free tier limitations (relationship cap ≈ 400k), only a subset of the original CSV was imported. The dataset was split into two UTF-8 parts, and a preliminary filtering stage removed games with zero recommendations (and earlier, those with both zero recommendations and zero rating).
 
-<ins>Retained columns (graph-relevant features):</ins>
+Fields used for graph modelling
 
-Name (primary entity)
+Name (primary identity)
 
 AppID
 
@@ -44,15 +44,13 @@ Price
 
 Discount
 
-Rating score (Wilson score interval lower bound)
+Rating (Wilson lower bound)
 
 Achievements
 
 Recommendations
 
 Supported languages
-
-Windows / Mac / Linux
 
 Developers
 
@@ -64,11 +62,10 @@ Genres
 
 Tags
 
-Several other columns were *deliberately* removed because they primarily featured cumulative, non-relational values that added little to graph reasoning and increased storage and processing overhead.
+Purely cumulative or textual fields were removed to reduce noise and maximize graph-relevant structure.
 
-**🗂️ Graph Data Model**
-
-<ins>Node Labels</ins>
+# 🗂️ Graph Data Model
+Node Labels
 
 Game
 
@@ -84,156 +81,167 @@ Language
 
 Tag
 
-Platform (Windows/Mac/Linux)
+Platform (Windows, Mac, Linux)
 
-<ins>Relationship Types</ins>
-
+Relationship Types
 (:Game)-[:PUBLISHED_BY]->(:Publisher)
-
 (:Game)-[:DEVELOPED_BY]->(:Developer)
-
 (:Game)-[:HAS_GENRE]->(:Genre)
-
 (:Game)-[:HAS_CATEGORY]->(:Category)
-
 (:Game)-[:SUPPORTS_LANGUAGE]->(:Language)
-
 (:Game)-[:SUPPORTS_PLATFORM]->(:Platform)
-
 (:Game)-[:HAS_TAG]->(:Tag)
 
-Array-like fields (e.g. languages, genres, categories, tags) are split into atomic nodes and relationships, so multiple games can share the same Language, Genre, etc., enabling genuine graph traversal and pattern discovery.
 
-**🧬 Schema Diagram**
+All array-like fields were expanded into atomic nodes and relationships, enabling meaningful graph traversal and similarity-based reasoning.
 
-A high-level schema visualization is included in the repository:
+# 🧬 Schema Diagram
 
-![SteamGamesColumns.png](attachment:a6ed7859-cd0b-4547-b025-222f76cffce8:image.png)
+A full diagram of the retained columns and mapped relationships is stored in the repository:
+
+# 📄 SteamGamesColumns.png
+
+This diagram illustrates how each column of the cleaned dataset maps into nodes or relationships.
+![image.png](attachment:a6ed7859-cd0b-4547-b025-222f76cffce8:image.png)
+
+Or here as a table: 
 
 | Game Node Title | Game Node Attribute | Game Node Attribute | Game Node Attribute | Game Node Attribute | Game Node Attribute | Game Node Attribute | Game Node Attribute | SUPPORTS LANGUAGE | SUPPORTS PLATFORM | SUPPORTS PLATFORM | SUPPORTS PLATFORM | DEVELOPED BY | PUBLISHED BY | HAS CATEGORY | HAS GENRE | HAS TAG |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| Name (Primary Entity) | AppID | Release date | Price | Discount | Rating | Achievements | Recommendations | Supported languages | Windows | Mac | Linux | Developers | Publishers | Categories | Genres | Tags |
-
-**⚙️ Import Pipeline (High-Level)**
-
-Because of the dataset size and Neo4j AuraDB free-tier relationship limits, the import was performed in several stages:
-
-Primary Game nodes
-
-Import (:Game) nodes with basic attributes (ID, release date, price, discount, rating, achievements, recommendations).
-
-Dataset reduction
-
-Remove games with zero recommendations (and, in an earlier step, games with both zero recommendations and zero rating).
-
-This reduced the graph from ~60k games and far more than ~400k relationships to roughly:
-
-~13k Game nodes
-
-~400k relationships
-
-<ins>Relationship rebuilds</ins>
-
-For each relationship type (e.g. Publisher, Developer, Genre, Category, Language, Tag), run a dedicated LOAD CSV + SPLIT + UNWIND import.
-
-Arrays such as Supported languages required additional cleaning (e.g. stripping brackets and quotes) before splitting.
-
-<ins>Tag relationships and AuraDB limit</ins>
-
-Tag relationships were imported last, as they generate a large number of edges.
-
-The free-tier limit of 400k relationships was essentially reached; only a small remainder of tag relationships exceeded the limit, which is acceptable for the project’s learning-oriented scope.
-
-**STILL IN PROGRESS --> 🌐 Web Application Architecture**
-
-The web application is intentionally minimal:
-
-<u>Backend</u>
-
-Language: Python
-
-Framework: Flask
-
-Database driver: Official neo4j Python driver
-
-<ins>Responsibilities:</ins>
-
-Manage a shared Neo4j driver/session.
-
-Expose HTTP endpoints such as /api/games-by-tag, /api/games-by-publisher, etc.
-
-Return JSON suitable for both table and graph visualizations.
-
-<ins>Frontend</ins>
-
-Stack: Plain HTML, CSS, and vanilla JavaScript (Fetch API).
-
-<ins>UI concept:</ins>
-
-Single-page layout with ~5 “query cards” (pre-selected query statements).
-
-Each card includes:
-
-Short explanation of the query.
-
-Optional user input (e.g. tag, publisher, game name).
-
-A “Run query” button.
-
-Results rendered either as:
-
-HTML tables (for lists), or
-
-Embedded graph visualization for at least one query.
-
-**STILL IN PROGRESS --> 🔎 Cypher Query Ideas**
-
-The system will implement at least five queries drawn from the following candidates:
-
-Games by Tag or Genre
-Input: tag/genre name.
-Output: list of games, with release date and price.
-
-Games by Publisher / Developer
-Input: publisher or developer name.
-Output: associated games with basic metadata.
-
-Similar / Related Games
-Input: game title.
-Output: games that share tags/genres or other structural similarities.
-
-Most “Popular” Games
-Input: none.
-Output: top N games ordered by, e.g., number of relationships or recommendation count.
-
-Co-occurring Tags or Dense Clusters
-Input: optional minimum count.
-Output: tag–tag or publisher–tag pairs with many games incident to them.
-
-Genre-Based Recommendations
-Input: game title.
-Output: games with overlapping genres/tags and similar properties (e.g. price range, rating).
-
-Publisher–Tag Statistics
-Input: optional minimum number of games.
-Output: publishers and their most characteristic tags.
-
-Oldest vs. Newest per Genre
-Input: none.
-Output: earliest and latest game per genre by release date.
-
-**STILL IN PROGRESS --> 📁 Project Structure**
+| Name (Primary Entity) | AppID | Release date | Price | Discount | Rating Score (Wilson score interval lower bound) | Achievements | Recommendations | Supported languages | Windows | Mac | Linux | Developers | Publishers | Categories | Genres | Tags |
 
 
-**STILL IN PROGRESS --> 🚀 Quick Start**
+# ⚙️ Import Pipeline (High-Level Overview)
 
+Due to the volume of relationships generated (especially by tags and genres), the data import required a staged pipeline:
 
-**STILL IN PROGRESS --> 📊 Graph Visualization (via WebApp)**
+1. Creation of Game nodes
 
+Imported core attributes for ~13k games (filtered down from the full dataset).
 
-**📖 Full Documentation**
+2. Dataset reduction
 
-Detailed planning, import scripts, intermediate statistics, and design rationales are documented in Notion:
+Games lacking activity (no recommendations or zero rating) were removed to remain within AuraDB Free limits.
 
-**👉 Neo4j Steam Games Graph Project Plan (Notion)**
-https://www.notion.so/Neo4j-Steam-Games-Graph-Project-Plan-2af149f538b4809eb4f8d69c3e24a766?showMoveTo=true&saveParent=true
+3. Incremental relationship imports
+
+Each relationship category was imported via a dedicated LOAD CSV:
+
+Developers
+
+Publishers
+
+Genres
+
+Categories
+
+Platforms
+
+Languages
+
+Tags (imported last due to very high cardinality)
+
+Each stage involved splitting and cleaning string arrays, removing artifacts such as brackets, quotes, and whitespace.
+
+4. AuraDB Free-tier constraints
+
+The resulting graph contains approximately:
+
+13,000+ game nodes
+
+399,000+ relationships
+
+Tag relationships slightly exceeded the limit; the final import therefore includes “most” but not all tag edges — sufficient for valid analysis.
+
+#🌐 Web Application
+
+The final application is written entirely in Python + Streamlit, with:
+
+a left-hand navigation panel
+
+eight predefined queries
+
+interactive Plotly and PyVis-based visualizations
+
+a Neo4j-backed analytics layer
+
+a modular architecture allowing easy extensibility
+
+Backend
+
+Official Neo4j Python driver
+
+.env configuration (URI, credentials, DB name)
+
+Frontend
+
+Streamlit interface
+
+Plotly for charts
+
+Custom PyVis layout for graph visualization
+
+Automatic full-window responsive layouts
+
+All queries run live against the Neo4j AuraDB instance.
+
+#🔎 Implemented Queries
+
+The app provides eight curated queries that demonstrate different graph reasoning patterns.
+
+Q1 – Games by Tag
+
+Q2 – Games by Publisher
+
+Q3 – Genre Distribution (bar/pie)
+
+Q4 – Average Price & Rating per Tag
+
+Q5 – Games per Release Year (line chart)
+
+Q6 – Game Neighborhood
+
+Q7 – Similar Games via Shared Tags
+
+Q8 – Publisher–Genre Subgraph
+
+All graphs scale to the browser window using Streamlit’s layout="wide" and explicit Plotly height control.
+
+#📁 Project Structure
+steamgames_neo4j_streamlit/
+│
+├── streamlit_app.py        # Main frontend application
+├── neo4j_conn.py           # Driver, session management, .env loader
+├── neo4j_queries.py        # All Cypher queries exposed to the UI
+├── graph_utils.py          # Graph layouts, PyVis+Plotly rendering
+├── requirements.txt        # Python dependencies
+└── .env.example            # Example config (no credentials committed)
+
+#🚀 Quick Start
+1. Clone the repository
+git clone https://github.com/JacobFaller/Neo4j_Project_SteamGames
+cd Neo4j_Project_SteamGames/steamgames_neo4j_streamlit
+
+2. Create a virtual environment & install dependencies
+python -m venv .venv
+source .venv/bin/activate  # or .venv\Scripts\activate on Windows
+pip install -r requirements.txt
+
+3. Add your Neo4j credentials
+
+Create a file named .env:
+
+NEO4J_URI=neo4j+s://xxxx.databases.neo4j.io
+NEO4J_USERNAME=neo4j
+NEO4J_PASSWORD=your-password
+NEO4J_DATABASE=neo4j
+
+4. Run the app
+streamlit run streamlit_app.py
+
+#📖 Full Documentation
+
+Detailed planning, reasoning, intermediate experiments, and data-cleaning notes are available in the accompanying Notion workspace:
+
+#👉 Neo4j Steam Games Graph Project Plan
+https://www.notion.so/Neo4j-Steam-Games-Graph-Project-Plan-2af149f538b4809eb4f8d69c3e24a766
