@@ -150,7 +150,7 @@ The resulting graph contains approximately:
 
 Tag relationships slightly exceeded the limit; the final import therefore includes “most” but not all tag edges — sufficient for valid analysis.
 
-#🌐 Web Application
+# 🌐 Web Application
 
 The final application is written entirely in Python + Streamlit, with:
 
@@ -182,7 +182,7 @@ Automatic full-window responsive layouts
 
 All queries run live against the Neo4j AuraDB instance.
 
-#🔎 Implemented Queries
+# 🔎 Implemented Queries
 
 The app provides eight curated queries that demonstrate different graph reasoning patterns.
 
@@ -204,7 +204,7 @@ Q8 – Publisher–Genre Subgraph
 
 All graphs scale to the browser window using Streamlit’s layout="wide" and explicit Plotly height control.
 
-#📁 Project Structure
+# 📁 Project Structure
 steamgames_neo4j_streamlit/
 │
 ├── streamlit_app.py        # Main frontend application
@@ -214,7 +214,7 @@ steamgames_neo4j_streamlit/
 ├── requirements.txt        # Python dependencies
 └── .env.example            # Example config (no credentials committed)
 
-#🚀 Quick Start
+# 🚀 Quick Start
 1. Clone the repository
 git clone https://github.com/JacobFaller/Neo4j_Project_SteamGames
 cd Neo4j_Project_SteamGames/steamgames_neo4j_streamlit
@@ -236,9 +236,9 @@ NEO4J_DATABASE=neo4j
 4. Run the app
 streamlit run streamlit_app.py
 
-#📖 Full Documentation
+# 📖 Full Documentation
 
 Detailed planning, reasoning, intermediate experiments, and data-cleaning notes are available in the accompanying Notion workspace:
 
-#👉 Neo4j Steam Games Graph Project Plan
+# 👉 Neo4j Steam Games Graph Project Plan
 https://www.notion.so/Neo4j-Steam-Games-Graph-Project-Plan-2af149f538b4809eb4f8d69c3e24a766
