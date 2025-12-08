@@ -70,16 +70,57 @@ def q4_avg_price_rating_per_tag(min_games: int = 20) -> pd.DataFrame:
 
 
 def q5_games_per_year(min_year: int, max_year: int) -> pd.DataFrame:
+    """
+    Aggregate games per release year using pandas.
+
+    The releaseDate is stored as strings like '01-Nov-00'.
+    We:
+      - fetch raw dates and prices from Neo4j
+      - parse them with pandas.to_datetime (format '%d-%b-%y')
+      - extract the year
+      - group by year (count, avg price)
+      - filter by [min_year, max_year]
+    """
+
     query = """
     MATCH (g:Game)
     WHERE g.releaseDate IS NOT NULL
-    WITH toInteger(substring(g.releaseDate, 0, 4)) AS year, g
-    WHERE year >= $minYear AND year <= $maxYear
-    RETURN year, count(*) AS gameCount, avg(g.price) AS avgPrice
-    ORDER BY year ASC;
+    RETURN
+        g.releaseDate AS releaseDate,
+        g.price       AS price;
     """
-    records = run_cypher(query, {"minYear": min_year, "maxYear": max_year})
-    return pd.DataFrame([r.data() for r in records])
+
+    records = run_cypher(query)
+    rows = [r.data() for r in records]
+    df = pd.DataFrame(rows)
+
+    if df.empty:
+        return df
+
+    # Parse the date strings like '01-Nov-00'
+    df["date"] = pd.to_datetime(df["releaseDate"], format="%d-%b-%y", errors="coerce")
+
+    # Drop rows we couldn't parse
+    df = df.dropna(subset=["date"])
+
+    # Extract year
+    df["year"] = df["date"].dt.year
+
+    # Group by year
+    grouped = (
+        df.groupby("year", as_index=False)
+        .agg(
+            gameCount=("year", "size"),
+            avgPrice=("price", "mean"),
+        )
+        .sort_values("year")
+    )
+
+    # Filter by selected range
+    grouped = grouped[(grouped["year"] >= min_year) & (grouped["year"] <= max_year)]
+
+    return grouped
+
 
 # ----------------------
 # Q6–Q8: GRAPH QUERIES
@@ -105,7 +146,7 @@ def q7_similar_games_shared_tags(game_name: str):
     WITH g, other, collect(DISTINCT t) AS sharedTags, count(DISTINCT t) AS commonTagCount
     WHERE commonTagCount >= 2
     ORDER BY commonTagCount DESC, other.rating DESC
-    LIMIT 20
+    LIMIT 10
     UNWIND sharedTags AS tag
     MATCH (g)-[r1:HAS_TAG]->(tag)
     MATCH (other)-[r2:HAS_TAG]->(tag)

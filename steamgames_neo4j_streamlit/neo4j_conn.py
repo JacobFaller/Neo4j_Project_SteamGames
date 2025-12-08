@@ -22,6 +22,6 @@ def get_driver():
 def run_cypher(query: str, parameters: dict | None = None):
     """Run a Cypher query and return a list of neo4j.Record objects."""
     driver = get_driver()
-    with driver.session(database=DATABASE) as session:
+    with driver.session(database=DATABASE, default_access_mode="READ") as session:
         result = session.run(query, parameters or {})
         return list(result)
