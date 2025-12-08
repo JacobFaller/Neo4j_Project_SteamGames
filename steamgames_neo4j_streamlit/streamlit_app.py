@@ -78,41 +78,76 @@ elif query.startswith("Q4"):
 elif query.startswith("Q5"):
     st.header("Q5 – Games per Release Year")
     col1, col2 = st.columns(2)
-    with col1: min_year = st.number_input("Min year", value=2000)
-    with col2: max_year = st.number_input("Max year", value=2025)
+    with col1:
+        min_year = st.number_input("Min year", value=2000, step=1)
+    with col2:
+        max_year = st.number_input("Max year", value=2025, step=1)
 
-    if st.button("Run"):
+    if st.button("Run Q5"):
         df = q5_games_per_year(int(min_year), int(max_year))
-        st.dataframe(df, use_container_width=True)
+        if df.empty:
+            st.warning("No data found for this year range.")
+        else:
+            st.subheader("Raw data")
+            st.dataframe(df, use_container_width=True)
 
-        fig = px.line(df, x="year", y="gameCount", title="Games per Year")
-        st.plotly_chart(fig, use_container_width=True)
+            fig = px.line(df, x="year", y="gameCount", title="Games per Year")
+            fig.update_layout(xaxis_title="Year", yaxis_title="Number of games")
+            st.plotly_chart(fig, use_container_width=True)
 
 # ---------------- GRAPH QUERIES ----------------
 
 elif query.startswith("Q6"):
-    st.header("Q6 – Game Neighborhood")
-    game = st.text_input("Game", "Portal 2")
-    if st.button("Run"):
-        records = q6_game_neighborhood(game)
-        net = build_network(records, ["g", "p", "d", "ge", "t", "l"], ["r1", "r2", "r3", "r4", "r5"])
-        net.show("q6.html")
-        components.html(open("q6.html").read(), height=600, width=1000)
+    st.header("Q6 – Game Neighborhood (graph)")
+    game_name = st.text_input("Game name", "Portal 2")
+    if st.button("Run Q6"):
+        records = q6_game_neighborhood(game_name)
+        if not records:
+            st.warning("No results found.")
+        else:
+            net = build_network(
+                records,
+                ["g", "p", "d", "ge", "t", "l"],
+                ["r1", "r2", "r3", "r4", "r5"],
+            )
+            net.show("q6.html")
+            with open("q6.html", encoding="utf-8") as f:
+                html = f.read()
+            components.html(html, height=600, width=1000)
 
 elif query.startswith("Q7"):
-    st.header("Q7 – Similar Games via Shared Tags")
-    game = st.text_input("Game", "Portal 2")
-    if st.button("Run"):
-        records = q7_similar_games_shared_tags(game)
-        net = build_network(records, ["g", "other", "tag"], ["r1", "r2"])
-        net.show("q7.html")
-        components.html(open("q7.html").read(), height=600, width=1000)
+    st.header("Q7 – Game Neighborhood (graph)")
+    game_name = st.text_input("Game name", "Portal 2")
+    if st.button("Run Q7"):
+        records = q6_game_neighborhood(game_name)
+        if not records:
+            st.warning("No results found.")
+        else:
+            net = build_network(
+                records,
+                ["g", "p", "d", "ge", "t", "l"],
+                ["r1", "r2", "r3", "r4", "r5"],
+            )
+            net.show("q7.html")
+            with open("q7.html", encoding="utf-8") as f:
+                html = f.read()
+            components.html(html, height=600, width=1000)
+
 
 elif query.startswith("Q8"):
-    st.header("Q8 – Publisher–Genre Subgraph")
-    pub = st.text_input("Publisher", "Valve")
-    if st.button("Run"):
-        records = q8_publisher_genre_subgraph(pub)
-        net = build_network(records, ["p", "g", "ge"], ["pubRel", "genRel"])
-        net.show("q8.html")
-        components.html(open("q8.html").read(), height=600, width=1000)
+    st.header("Q8 – Game Neighborhood (graph)")
+    game_name = st.text_input("Game name", "Portal 2")
+    if st.button("Run Q8"):
+        records = q6_game_neighborhood(game_name)
+        if not records:
+            st.warning("No results found.")
+        else:
+            net = build_network(
+                records,
+                ["g", "p", "d", "ge", "t", "l"],
+                ["r1", "r2", "r3", "r4", "r5"],
+            )
+            net.show("q8.html")
+            with open("q8.html", encoding="utf-8") as f:
+                html = f.read()
+            components.html(html, height=600, width=1000)

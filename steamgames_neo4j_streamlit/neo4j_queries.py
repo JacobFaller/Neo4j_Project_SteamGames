@@ -30,7 +30,7 @@ def q2_games_by_publisher(publisher_name: str) -> pd.DataFrame:
         g.price AS price,
         g.rating AS rating,
         g.recommendations AS recommendations,
-        size((g)-[:HAS_TAG]->(:Tag)) AS tagCount
+        count { (g)-[:HAS_TAG]->(:Tag) } AS tagCount
     ORDER BY g.rating DESC, g.recommendations DESC
     LIMIT 50;
     """
@@ -125,3 +125,4 @@ def q8_publisher_genre_subgraph(publisher_name: str):
     RETURN p, g, ge, pubRel, genRel;
     """
     return run_cypher(query, {"publisherName": publisher_name})
+

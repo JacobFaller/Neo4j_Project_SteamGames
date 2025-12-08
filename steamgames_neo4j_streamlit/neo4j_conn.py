@@ -1,8 +1,11 @@
 import os
+from pathlib import Path
 from neo4j import GraphDatabase
 from dotenv import load_dotenv
 
-load_dotenv()
+# Load .env next to this file
+ENV_PATH = Path(__file__).with_name(".env")
+load_dotenv(dotenv_path=ENV_PATH)
 
 URI = os.getenv("NEO4J_URI")
 USER = os.getenv("NEO4J_USER")
@@ -17,7 +20,7 @@ def get_driver():
 
 
 def run_cypher(query: str, parameters: dict | None = None):
-    """Run a Cypher query on Aura and return records."""
+    """Run a Cypher query and return a list of neo4j.Record objects."""
     driver = get_driver()
     with driver.session(database=DATABASE) as session:
         result = session.run(query, parameters or {})
