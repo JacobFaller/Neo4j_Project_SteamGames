@@ -207,12 +207,19 @@ All graphs scale to the browser window using Streamlit’s layout="wide" and exp
 # 📁 Project Structure
 steamgames_neo4j_streamlit/
 │
+
 ├── streamlit_app.py        # Main frontend application
+
 ├── neo4j_conn.py           # Driver, session management, .env loader
+
 ├── neo4j_queries.py        # All Cypher queries exposed to the UI
+
 ├── graph_utils.py          # Graph layouts, PyVis+Plotly rendering
+
 ├── requirements.txt        # Python dependencies
+
 └── .env.example            # Example config (no credentials committed)
+
 
 
 # 🚀 Quick Start
