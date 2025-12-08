@@ -100,7 +100,7 @@ def q5_games_per_year(min_year: int, max_year: int) -> pd.DataFrame:
     # Parse the date strings like '01-Nov-00'
     df["date"] = pd.to_datetime(df["releaseDate"], format="%d-%b-%y", errors="coerce")
 
-    # Drop rows we couldn't parse
+    # Drop rows that couldn't be parsed
     df = df.dropna(subset=["date"])
 
     # Extract year

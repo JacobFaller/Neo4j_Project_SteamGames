@@ -39,7 +39,8 @@ query = st.sidebar.radio(
 # ---------------- TABLE QUERIES ----------------
 
 if query.startswith("Q1"):
-    st.header("Q1 – Games by Tag")
+    st.header("Q1 – Game Neighborhood (graph)")
+    st.write("Displays a ranked list of games associated with a selected tag, including their release year, price, rating, and popularity.")
     tag = st.text_input("Tag name", "Adventure")
     if st.button("Run"):
         df = q1_games_by_tag(tag)
@@ -47,6 +48,7 @@ if query.startswith("Q1"):
 
 elif query.startswith("Q2"):
     st.header("Q2 – Games by Publisher")
+    st.write("Retrieves all games published by a chosen publisher and summarizes their pricing, ratings, and tagging breadth.")
     pub = st.text_input("Publisher", "Valve")
     if st.button("Run"):
         df = q2_games_by_publisher(pub)
@@ -56,6 +58,7 @@ elif query.startswith("Q2"):
 
 elif query.startswith("Q3"):
     st.header("Q3 – Genre Distribution")
+    st.write("Visualizes the distribution of games across genres to highlight which genres are most prevalent in the dataset.")
     if st.button("Run"):
         df = q3_genre_distribution()
         st.dataframe(df, use_container_width=True)
@@ -65,6 +68,7 @@ elif query.startswith("Q3"):
 
 elif query.startswith("Q4"):
     st.header("Q4 – Avg Price & Rating per Tag")
+    st.write("Aggregates games by tag to compare average prices, average ratings, and tag popularity.")
     min_games = st.slider("Minimum games", 5, 100, 20)
     if st.button("Run"):
         df = q4_avg_price_rating_per_tag(min_games=min_games)
@@ -82,6 +86,7 @@ elif query.startswith("Q4"):
 
 elif query.startswith("Q5"):
     st.header("Q5 – Games per Release Year")
+    st.write("Analyzes temporal trends by plotting the number of games released per year within a chosen time interval.")
     col1, col2 = st.columns(2)
     with col1:
         min_year = st.number_input("Min year", value=2000, step=1)
@@ -108,6 +113,7 @@ elif query.startswith("Q5"):
 
 elif query.startswith("Q6"):
     st.header("Q6 – Game Neighborhood (graph)")
+    st.write("Shows the immediate semantic neighborhood of a selected game, including its publishers, developers, genres, tags, and supported languages.")
     game_name = st.text_input("Game name", "Portal 2")
     if st.button("Run Q6"):
         records = q6_game_neighborhood(game_name)
@@ -128,6 +134,7 @@ elif query.startswith("Q6"):
 
 elif query.startswith("Q7"):
     st.header("Q7 – Similar Games via Shared Tags (graph)")
+    st.write("Identifies and visualizes games that share multiple tags with the selected title, revealing clusters of related gameplay or thematic elements.")
     game_name = st.text_input("Game name", "Portal 2")
     if st.button("Run Q7"):
         records = q7_similar_games_shared_tags(game_name)
@@ -149,6 +156,7 @@ elif query.startswith("Q7"):
 
 elif query.startswith("Q8"):
     st.header("Q8 – Publisher–Genre Subgraph (graph)")
+    st.write("Illustrates how a publisher's catalog spans across genres by linking each genre to representative high-rated games.")
     pub_name = st.text_input("Publisher name", "Valve")
     if st.button("Run Q8"):
         records = q8_publisher_genre_subgraph(pub_name)
