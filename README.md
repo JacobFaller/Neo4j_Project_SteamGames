@@ -85,26 +85,23 @@ Platform (Windows, Mac, Linux)
 
 Relationship Types
 (:Game)-[:PUBLISHED_BY]->(:Publisher)
+
 (:Game)-[:DEVELOPED_BY]->(:Developer)
+
 (:Game)-[:HAS_GENRE]->(:Genre)
+
 (:Game)-[:HAS_CATEGORY]->(:Category)
+
 (:Game)-[:SUPPORTS_LANGUAGE]->(:Language)
+
 (:Game)-[:SUPPORTS_PLATFORM]->(:Platform)
+
 (:Game)-[:HAS_TAG]->(:Tag)
 
 
 All array-like fields were expanded into atomic nodes and relationships, enabling meaningful graph traversal and similarity-based reasoning.
 
-# 🧬 Schema Diagram
-
-A full diagram of the retained columns and mapped relationships is stored in the repository:
-
-# 📄 SteamGamesColumns.png
-
-This diagram illustrates how each column of the cleaned dataset maps into nodes or relationships.
-![image.png](attachment:a6ed7859-cd0b-4547-b025-222f76cffce8:image.png)
-
-Or here as a table: 
+Here is a general overview:
 
 | Game Node Title | Game Node Attribute | Game Node Attribute | Game Node Attribute | Game Node Attribute | Game Node Attribute | Game Node Attribute | Game Node Attribute | SUPPORTS LANGUAGE | SUPPORTS PLATFORM | SUPPORTS PLATFORM | SUPPORTS PLATFORM | DEVELOPED BY | PUBLISHED BY | HAS CATEGORY | HAS GENRE | HAS TAG |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
