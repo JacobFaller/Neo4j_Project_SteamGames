@@ -214,6 +214,7 @@ steamgames_neo4j_streamlit/
 ├── requirements.txt        # Python dependencies
 └── .env.example            # Example config (no credentials committed)
 
+
 # 🚀 Quick Start
 1. Clone the repository
 git clone https://github.com/JacobFaller/Neo4j_Project_SteamGames
