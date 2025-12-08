@@ -4,6 +4,10 @@ This project constructs and explores a graph database of Steam games using Neo4j
 
 The focus of this work is graph modelling, import strategy, Cypher query design, and visual reasoning — not the development of a large-scale production system.
 
+# App Deployed Here -->
+
+https://steamgamesoverview.streamlit.app/
+
 # 📚 Table of Contents
 
 Dataset Overview
