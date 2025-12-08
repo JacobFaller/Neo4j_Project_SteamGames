@@ -224,21 +224,23 @@ steamgames_neo4j_streamlit/
 
 # 🚀 Quick Start
 1. Clone the repository
+
 git clone https://github.com/JacobFaller/Neo4j_Project_SteamGames
 cd Neo4j_Project_SteamGames/steamgames_neo4j_streamlit
 
-2. Create a virtual environment & install dependencies
+3. Create a virtual environment & install dependencies
+   
 python -m venv .venv
 source .venv/bin/activate  # or .venv\Scripts\activate on Windows
 pip install -r requirements.txt
 
-3. Add your Neo4j credentials
+4. Add your Neo4j credentials
 
 Create a file named .env:
 
-NEO4J_URI=neo4j+s://xxxx.databases.neo4j.io
-NEO4J_USERNAME=neo4j
-NEO4J_PASSWORD=your-password
+NEO4J_URI=neo4j+s://71308a94.databases.neo4j.io
+NEO4J_USER=neo4j
+NEO4J_PASSWORD=your-password <-- Will be sent by Jacob
 NEO4J_DATABASE=neo4j
 
 4. Run the app
@@ -248,5 +250,4 @@ streamlit run streamlit_app.py
 
 Detailed planning, reasoning, intermediate experiments, and data-cleaning notes are available in the accompanying Notion workspace:
 
-# 👉 Neo4j Steam Games Graph Project Plan
-https://www.notion.so/Neo4j-Steam-Games-Graph-Project-Plan-2af149f538b4809eb4f8d69c3e24a766
+👉 https://www.notion.so/Neo4j-Steam-Games-Graph-Project-Plan-2af149f538b4809eb4f8d69c3e24a766
