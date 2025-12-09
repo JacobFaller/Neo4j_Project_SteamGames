@@ -1,3 +1,5 @@
+# NOT NEEDED IN PROD; Only used to test connection & auth
+
 from neo4j_conn import URI, USER, DATABASE, PASSWORD, run_cypher
 
 print("DEBUG: URI      =", URI)
