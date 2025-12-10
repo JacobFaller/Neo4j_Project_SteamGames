@@ -194,7 +194,7 @@ def q9_n_est_games_from_source_graph(game_name: str, n: int):
     UNWIND relationships(p) AS rel
     RETURN
         g   AS sourceGame,
-        node.name AS node,
+        node AS node,
         rel  AS rel;
     """
 
