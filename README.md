@@ -244,9 +244,11 @@ steamgames_neo4j_streamlit/
       Create a file named .env:
 
       NEO4J_URI=neo4j+s://71308a94.databases.neo4j.io
+   
       NEO4J_USER=neo4j
    
       NEO4J_PASSWORD=your-password <-- Can be provided by Jacob
+   
       NEO4J_DATABASE=neo4j
 
 6. Run the app
