@@ -11,6 +11,8 @@ from neo4j_queries import (
     q6_game_neighborhood,
     q7_similar_games_shared_tags,
     q8_publisher_genre_subgraph,
+    q9_n_est_games_from_source_graph,
+    q10_tag_based_recommendations_graph,
 )
 
 st.set_page_config(
@@ -28,7 +30,10 @@ OPTIONS = [
     "Q6 – Game Neighborhood (graph)",
     "Q7 – Similar Games via Shared Tags (graph)",
     "Q8 – Publisher–Genre Subgraph (graph)",
+    "Q9 – N-est Games from Source (graph)",
+    "Q0 – Tag-based Recommendations (graph)",
 ]
+
 
 # ---------- get current view from URL ----------
 params = st.query_params
@@ -142,15 +147,18 @@ if current_view == "Home":
     cols = st.columns(3)
 
     tiles = [
-        "Q1 – Games by Tag (table)",
-        "Q2 – Games by Publisher (table)",
-        "Q3 – Genre Distribution (chart)",
-        "Q4 – Avg Price & Rating per Tag (chart)",
-        "Q5 – Games per Release Year (chart)",
-        "Q6 – Game Neighborhood (graph)",
-        "Q7 – Similar Games via Shared Tags (graph)",
-        "Q8 – Publisher–Genre Subgraph (graph)",
+    "Q1 – Games by Tag (table)",
+    "Q2 – Games by Publisher (table)",
+    "Q3 – Genre Distribution (chart)",
+    "Q4 – Avg Price & Rating per Tag (chart)",
+    "Q5 – Games per Release Year (chart)",
+    "Q6 – Game Neighborhood (graph)",
+    "Q7 – Similar Games via Shared Tags (graph)",
+    "Q8 – Publisher–Genre Subgraph (graph)",
+    "Q9 – N-est Games from Source (graph)",
+    "Q10 – Tag-based Recommendations (graph)",
     ]
+
 
 
     for i, label in enumerate(tiles):
@@ -328,4 +336,100 @@ elif current_view.startswith("Q8"):
                         "displayModeBar": True,
                         "dragmode": "pan"     # ← makes dragging move the graph
                     }
+                )
+
+
+elif current_view.startswith("Q9"):
+    st.header("Q9 – N-est Games from Source (graph)")
+    st.write(
+        "From a selected game, finds and visualizes up to five other games that are "
+        "exactly **n thematic relationships (tag/genre)** away."
+    )
+
+    col1, col2 = st.columns(2)
+    with col1:
+        source_game = st.text_input("Source game", "Portal 2")
+    with col2:
+        n = st.selectbox("Distance n", [2, 4, 6], index=0)
+
+    if st.button("Run Q9"):
+        try:
+            records = q9_n_est_games_from_source_graph(source_game, int(n))
+        except ValueError as e:
+            st.error(str(e))
+            records = []
+
+        if not records:
+            st.warning(
+                f"No games found at exactly {int(n)} thematic hops "
+                f"from '{source_game}'."
+            )
+        else:
+            fig = build_network_figure(
+                records,
+                node_keys=["sourceGame", "node"],
+                rel_keys=["rel"],
+                title=f"Thematic games at distance n = {int(n)} from {source_game}",
+                layout_mode="spring",
+            )
+            if fig is None:
+                st.warning("Graph is empty.")
+            else:
+                st.plotly_chart(
+                    fig,
+                    use_container_width=True,
+                    config={
+                        "scrollZoom": True,
+                        "displayModeBar": True,
+                        "dragmode": "pan",
+                    },
+                )
+
+
+elif current_view.startswith("Q0"):
+    st.header("Q0 – Tag-based Recommendations (graph)")
+    st.write(
+        "Recommends up to five games based on **shared tags** with the selected title, "
+        "and visualizes the source game, recommended games, and connecting tags."
+    )
+
+    game_name = st.text_input("Game name", "Portal 2")
+
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        tag1 = st.text_input("Tag 1 (optional)", "")
+    with col2:
+        tag2 = st.text_input("Tag 2 (optional)", "")
+    with col3:
+        tag3 = st.text_input("Tag 3 (optional)", "")
+
+    if st.button("Run Q10"):
+        tags = [t for t in [tag1, tag2, tag3] if t.strip()]
+
+        records = q10_tag_based_recommendations_graph(game_name, tags)
+
+        if not records:
+            st.warning(
+                "No recommendations found. "
+                "Check the game name and/or try different tags."
+            )
+        else:
+            fig = build_network_figure(
+                records,
+                node_keys=["sourceGame", "recommendedGame", "tag"],
+                rel_keys=["srcTagRel", "recTagRel", "recRel"],
+                title=f"Tag-based recommendations for {game_name}",
+                layout_mode="spring",
+            )
+            if fig is None:
+                st.warning("Graph is empty.")
+            else:
+                st.plotly_chart(
+                    fig,
+                    use_container_width=True,
+                    config={
+                        "scrollZoom": True,
+                        "displayModeBar": True,
+                        "dragmode": "pan",
+                    },
                 )

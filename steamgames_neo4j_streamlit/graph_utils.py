@@ -44,13 +44,17 @@ def _records_to_graph(records, node_keys, rel_keys):
             else:
                 continue
 
+            # Create node if missing, then always update attributes
             if node_id not in G:
-                G.add_node(
-                    node_id,
-                    label=props.get("name") or props.get("title") or group,
-                    group=group,
-                    role=key,  # <= this lets us distinguish g / other / tag
-                )
+                G.add_node(node_id)
+
+            G.nodes[node_id]["label"] = (
+                props.get("name") or props.get("title") or group
+            )
+            G.nodes[node_id]["group"] = group
+            G.nodes[node_id]["role"] = key  # g / other / tag / sourceGame / node / etc.
+
+
 
         # ---------- Relationships ----------
         for key in rel_keys:

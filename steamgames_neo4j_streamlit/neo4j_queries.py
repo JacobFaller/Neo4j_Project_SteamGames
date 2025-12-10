@@ -167,3 +167,110 @@ def q8_publisher_genre_subgraph(publisher_name: str):
     """
     return run_cypher(query, {"publisherName": publisher_name})
 
+from neo4j_conn import run_cypher
+import pandas as pd
+
+
+def q9_n_est_games_from_source_graph(game_name: str, n: int):
+    """
+    From a source game, find games that are exactly `n` relationships away,
+    using only thematic relationships (HAS_TAG, HAS_GENRE).
+
+    Note: Due to the Game ↔ Tag/Genre bipartite structure, only even n
+    (2, 4, …) can produce Game→Game paths. We enforce this here.
+    """
+    if n not in (2, 4, 6):
+        # You can also just return [] instead of raising if you prefer.
+        raise ValueError("For thematic paths, only n = 2, 4 or 6 are meaningful.")
+
+    query = f"""
+    MATCH p = (g:Game {{name: $gameName}})-
+              [:HAS_TAG|HAS_GENRE*{n}..{n}]-
+              (other:Game)
+    WHERE g <> other
+    WITH g, p
+    LIMIT 5
+    UNWIND nodes(p) AS node
+    UNWIND relationships(p) AS rel
+    RETURN
+        g   AS sourceGame,
+        node.name AS node,
+        rel  AS rel;
+    """
+
+    return run_cypher(query, {"gameName": game_name})
+
+
+def q10_tag_based_recommendations_graph(
+    game_name: str,
+    tags: list[str] | None = None,
+):
+    """
+    Graph query:
+      Recommend up to 5 games based on shared tags with the given game.
+      Optionally restrict to a list of tag names.
+      Returns records suitable for build_network_figure.
+    """
+    tag_list = [t.strip() for t in (tags or []) if t and t.strip()]
+
+    query = """
+    MATCH (source:Game {name: $gameName})
+    WITH source, $tagList AS tagList
+
+    // Tags on the source game (optionally filtered by user-input tags)
+    OPTIONAL MATCH (source)-[:HAS_TAG]->(t:Tag)
+    WHERE size(tagList) = 0 OR t.name IN tagList
+    WITH source, collect(DISTINCT t) AS relevantTags
+    WHERE size(relevantTags) > 0
+
+    // --- compute top 5 recommended games in a subquery ---
+    CALL {
+        WITH source, relevantTags
+        UNWIND relevantTags AS tag
+        MATCH (tag)<-[:HAS_TAG]-(other:Game)
+        WHERE other <> source
+        WITH other, collect(DISTINCT tag) AS matchedTags
+        WITH other,
+             matchedTags,
+             size(matchedTags) AS tagOverlap,
+             other.rating      AS rating,
+             other.recommendations AS recommendations
+        WHERE tagOverlap > 0
+        ORDER BY tagOverlap DESC, rating DESC, recommendations DESC
+        LIMIT 5
+        RETURN collect(other) AS topGames
+    }
+
+    // --- project graph structure for the chosen games and tags ---
+    UNWIND topGames AS rec
+    UNWIND relevantTags AS tag
+    OPTIONAL MATCH (source)-[st:HAS_TAG]->(tag)
+    OPTIONAL MATCH (rec)-[rt:HAS_TAG]->(tag)
+    WHERE st IS NOT NULL OR rt IS NOT NULL
+
+    WITH DISTINCT source, rec, tag, st, rt
+    WITH
+        source,
+        rec,
+        tag,
+        st,
+        rt,
+        {start_node_id: id(source),
+         end_node_id:   id(rec),
+         type:          'RECOMMENDED'} AS recRel
+    RETURN
+        source AS sourceGame,
+        rec    AS recommendedGame,
+        tag,
+        st     AS srcTagRel,
+        rt     AS recTagRel,
+        recRel;
+    """
+
+    return run_cypher(
+        query,
+        {
+            "gameName": game_name,
+            "tagList": tag_list,
+        },
+    )

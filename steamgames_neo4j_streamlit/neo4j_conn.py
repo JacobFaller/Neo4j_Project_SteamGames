@@ -1,9 +1,9 @@
+# neo4j_conn.py
 import os
 from pathlib import Path
 from neo4j import GraphDatabase
 from dotenv import load_dotenv
 
-# Load .env next to this file
 ENV_PATH = Path(__file__).with_name(".env")
 load_dotenv(dotenv_path=ENV_PATH)
 
@@ -12,11 +12,13 @@ USER = os.getenv("NEO4J_USER")
 PASSWORD = os.getenv("NEO4J_PASSWORD")
 DATABASE = os.getenv("NEO4J_DATABASE")
 
+# Create ONE driver when the module is imported
+_driver = GraphDatabase.driver(URI, auth=(USER, PASSWORD))
+
 
 def get_driver():
-    """Create a Neo4j driver instance."""
-    driver = GraphDatabase.driver(URI, auth=(USER, PASSWORD))
-    return driver
+    """Return the global Neo4j driver instance."""
+    return _driver
 
 
 def run_cypher(query: str, parameters: dict | None = None):
