@@ -258,4 +258,4 @@ steamgames_neo4j_streamlit/
 
 Detailed planning, reasoning, intermediate experiments, and data-cleaning notes are available in the accompanying Notion workspace:
 
-👉 https://www.notion.so/Notion-Neo4j-Steam-Games-Graph-Project-Plan-2af149f538b4809eb4f8d69c3e24a766?showMoveTo=true&saveParent=true
+👉 [https://www.notion.so/Notion-Neo4j-Steam-Games-Graph-Project-Plan-2af149f538b4809eb4f8d69c3e24a766?showMoveTo=true&saveParent=true](https://purple-saxophone-9c2.notion.site/Notion-Neo4j-Steam-Games-Graph-Project-Plan-2af149f538b4809eb4f8d69c3e24a766)
