@@ -86,26 +86,24 @@ def _records_to_graph(records, node_keys, rel_keys):
 
 def _radial_layout_q7(G):
     """
-    Custom layout for Q7:
-      - role 'g'      -> center
-      - role 'tag'    -> middle ring
-      - role 'other'  -> outer ring
+    Custom layout:
+      - center:     main game(s)
+      - middle ring: tags
+      - outer ring: other games / nodes
     """
-    # Separate nodes by role (fallback to group if role missing)
     center_nodes = []
     tag_nodes = []
     other_nodes = []
 
     for n, attrs in G.nodes(data=True):
-        role = attrs.get("role")  # g / other / tag in Q7
+        role = attrs.get("role")
         group = attrs.get("group")
 
-        if role == "g":
+        # center for both Q7 ("g") and Q0 ("sourceGame")
+        if role in ("g", "sourceGame"):
             center_nodes.append(n)
         elif role == "tag" or group == "Tag":
             tag_nodes.append(n)
-        elif role == "other":
-            other_nodes.append(n)
         else:
             other_nodes.append(n)
 
@@ -115,7 +113,6 @@ def _radial_layout_q7(G):
     for n in center_nodes:
         pos[n] = (0.0, 0.0)
 
-    # Helper to place nodes on a circle of given radius
     def place_circle(nodes, radius):
         if not nodes:
             return
@@ -124,7 +121,7 @@ def _radial_layout_q7(G):
             angle = i * step
             pos[n] = (radius * math.cos(angle), radius * math.sin(angle))
 
-    # Tags in middle ring, similar games in outer ring
+    # Tags in middle ring, similar/recommended games in outer ring
     place_circle(tag_nodes, radius=1.0)
     place_circle(other_nodes, radius=2.0)
 
@@ -151,7 +148,7 @@ def build_network_figure(records, node_keys, rel_keys, title="Graph", layout_mod
         pos = nx.spring_layout(G, seed=42)
 
     # ---------- Edges: highlight edges connected to the main game ----------
-    primary_nodes = [n for n, attrs in G.nodes(data=True) if attrs.get("role") == "g"]
+    primary_nodes = [n for n, attrs in G.nodes(data=True) if attrs.get("role") in ("g", "sourceGame")]
 
     primary_edge_x = []
     primary_edge_y = []
@@ -188,53 +185,64 @@ def build_network_figure(records, node_keys, rel_keys, title="Graph", layout_mod
     )
 
     # ---------- Nodes: grouped traces so we get a legend ----------
+
+    # base colors per node group (label)
     group_colors = {
-        "Game": "#ffcc00",       # highlight games
+        "Game": "#ffcc00",       # normal games
         "Publisher": "#ff7f0e",
         "Developer": "#1f77b4",
-        "Genre": "#2ca02c",
+        "Genre": "#a9ebf5",
         "Tag": "#d62728",
         "Language": "#9467bd",
     }
     default_color = "#1f77b4"
 
-    # group -> {x, y, text, hover, size}
-    grouped_nodes: dict[str, dict[str, list]] = {}
+    SOURCE_GAME_COLOR = "#48c66a" 
+
+    # display_group -> {x, y, text, hover, size, color}
+    grouped_nodes = {}
 
     for node_id, attrs in G.nodes(data=True):
         x, y = pos[node_id]
         group = attrs.get("group", "Other")
         label = attrs.get("label", str(node_id))
+        role = attrs.get("role")
 
-        if group not in grouped_nodes:
-            grouped_nodes[group] = {
+        # Decide color & size
+        if role in ("sourceGame", "g"):
+            node_color = SOURCE_GAME_COLOR
+            node_size = 28
+            display_group = "Source Game"
+        else:
+            node_color = group_colors.get(group, default_color)
+            node_size = 22 if group == "Game" else 12
+            display_group = group
+
+        if display_group not in grouped_nodes:
+            grouped_nodes[display_group] = {
                 "x": [],
                 "y": [],
                 "text": [],
                 "hover": [],
                 "size": [],
+                "color": [],
             }
 
-        grouped_nodes[group]["x"].append(x)
-        grouped_nodes[group]["y"].append(y)
-        grouped_nodes[group]["text"].append(label)
-        grouped_nodes[group]["hover"].append(f"{group}: {label}")
-
-        # Make Game nodes larger
-        if group == "Game":
-            grouped_nodes[group]["size"].append(22)
-        else:
-            grouped_nodes[group]["size"].append(12)
+        grouped_nodes[display_group]["x"].append(x)
+        grouped_nodes[display_group]["y"].append(y)
+        grouped_nodes[display_group]["text"].append(label)
+        grouped_nodes[display_group]["hover"].append(f"{display_group}: {label}")
+        grouped_nodes[display_group]["size"].append(node_size)
+        grouped_nodes[display_group]["color"].append(node_color)
 
     node_traces = []
-    for group, data in grouped_nodes.items():
-        color = group_colors.get(group, default_color)
+    for display_group, data in grouped_nodes.items():
         node_traces.append(
             go.Scatter(
                 x=data["x"],
                 y=data["y"],
                 mode="markers+text",
-                name=group,                 # <-- appears in legend
+                name=display_group,                 # appears in legend
                 text=data["text"],
                 textposition="top center",
                 hovertext=data["hover"],
@@ -242,7 +250,7 @@ def build_network_figure(records, node_keys, rel_keys, title="Graph", layout_mod
                 marker=dict(
                     size=data["size"],
                     line=dict(width=1, color="rgba(255,255,255,0.7)"),
-                    color=color,
+                    color=data["color"],           # per-node colors
                 ),
                 showlegend=True,
             )
@@ -261,7 +269,7 @@ def build_network_figure(records, node_keys, rel_keys, title="Graph", layout_mod
                 y=-0.15,            # push legend below the plot area
                 xanchor="center",
                 x=0.5,
-                font=dict(size=10),  # optional: slightly smaller text
+                font=dict(size=10),
             ),
             margin=dict(l=10, r=10, b=10, t=40),
             xaxis=dict(showgrid=False, zeroline=False, showticklabels=False),

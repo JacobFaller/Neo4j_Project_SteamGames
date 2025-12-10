@@ -12,7 +12,7 @@ from neo4j_queries import (
     q7_similar_games_shared_tags,
     q8_publisher_genre_subgraph,
     q9_n_est_games_from_source_graph,
-    q10_tag_based_recommendations_graph,
+    q0_tag_based_recommendations_graph,
 )
 
 st.set_page_config(
@@ -156,7 +156,7 @@ if current_view == "Home":
     "Q7 – Similar Games via Shared Tags (graph)",
     "Q8 – Publisher–Genre Subgraph (graph)",
     "Q9 – N-est Games from Source (graph)",
-    "Q10 – Tag-based Recommendations (graph)",
+    "Q0 – Tag-based Recommendations (graph)",
     ]
 
 
@@ -403,10 +403,10 @@ elif current_view.startswith("Q0"):
     with col3:
         tag3 = st.text_input("Tag 3 (optional)", "")
 
-    if st.button("Run Q10"):
+    if st.button("Run Q0"):
         tags = [t for t in [tag1, tag2, tag3] if t.strip()]
 
-        records = q10_tag_based_recommendations_graph(game_name, tags)
+        records = q0_tag_based_recommendations_graph(game_name, tags)
 
         if not records:
             st.warning(
@@ -417,9 +417,9 @@ elif current_view.startswith("Q0"):
             fig = build_network_figure(
                 records,
                 node_keys=["sourceGame", "recommendedGame", "tag"],
-                rel_keys=["srcTagRel", "recTagRel", "recRel"],
+                rel_keys=["srcTagRel", "recTagRel"],
                 title=f"Tag-based recommendations for {game_name}",
-                layout_mode="spring",
+                layout_mode="q7_radial",   # radial layout: center game, ring of tags, outer ring of games
             )
             if fig is None:
                 st.warning("Graph is empty.")

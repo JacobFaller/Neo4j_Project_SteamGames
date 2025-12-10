@@ -1,5 +1,7 @@
 import pandas as pd
 from neo4j_conn import run_cypher
+from typing import Optional, List
+
 
 # ----------------------
 # Q1 & Q2: TABLE QUERIES
@@ -143,7 +145,7 @@ def q7_similar_games_shared_tags(game_name: str):
     query = """
     MATCH (g:Game {name: $gameName})-[:HAS_TAG]->(t:Tag)<-[:HAS_TAG]-(other:Game)
     WHERE g <> other
-    WITH g, other, collect(DISTINCT t) AS sharedTags, count(DISTINCT t) AS commonTagCount
+    WITH g, other, collect(DISTINCT t)[0..3] AS sharedTags, count(DISTINCT t) AS commonTagCount
     WHERE commonTagCount >= 2
     ORDER BY commonTagCount DESC, other.rating DESC
     LIMIT 10
@@ -201,29 +203,21 @@ def q9_n_est_games_from_source_graph(game_name: str, n: int):
     return run_cypher(query, {"gameName": game_name})
 
 
-def q10_tag_based_recommendations_graph(
+def q0_tag_based_recommendations_graph(
     game_name: str,
-    tags: list[str] | None = None,
+    tags: Optional[List[str]] = None,
 ):
-    """
-    Graph query:
-      Recommend up to 5 games based on shared tags with the given game.
-      Optionally restrict to a list of tag names.
-      Returns records suitable for build_network_figure.
-    """
     tag_list = [t.strip() for t in (tags or []) if t and t.strip()]
 
     query = """
     MATCH (source:Game {name: $gameName})
     WITH source, $tagList AS tagList
 
-    // Tags on the source game (optionally filtered by user-input tags)
     OPTIONAL MATCH (source)-[:HAS_TAG]->(t:Tag)
     WHERE size(tagList) = 0 OR t.name IN tagList
-    WITH source, collect(DISTINCT t) AS relevantTags
+    WITH source, collect(DISTINCT t)[0..8] AS relevantTags
     WHERE size(relevantTags) > 0
 
-    // --- compute top 5 recommended games in a subquery ---
     CALL {
         WITH source, relevantTags
         UNWIND relevantTags AS tag
@@ -241,7 +235,6 @@ def q10_tag_based_recommendations_graph(
         RETURN collect(other) AS topGames
     }
 
-    // --- project graph structure for the chosen games and tags ---
     UNWIND topGames AS rec
     UNWIND relevantTags AS tag
     OPTIONAL MATCH (source)-[st:HAS_TAG]->(tag)
@@ -249,22 +242,12 @@ def q10_tag_based_recommendations_graph(
     WHERE st IS NOT NULL OR rt IS NOT NULL
 
     WITH DISTINCT source, rec, tag, st, rt
-    WITH
-        source,
-        rec,
-        tag,
-        st,
-        rt,
-        {start_node_id: id(source),
-         end_node_id:   id(rec),
-         type:          'RECOMMENDED'} AS recRel
     RETURN
         source AS sourceGame,
         rec    AS recommendedGame,
         tag,
         st     AS srcTagRel,
-        rt     AS recTagRel,
-        recRel;
+        rt     AS recTagRel;
     """
 
     return run_cypher(
@@ -274,3 +257,4 @@ def q10_tag_based_recommendations_graph(
             "tagList": tag_list,
         },
     )
+
