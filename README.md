@@ -245,11 +245,12 @@ steamgames_neo4j_streamlit/
 
       NEO4J_URI=neo4j+s://71308a94.databases.neo4j.io
       NEO4J_USER=neo4j
-      NEO4J_PASSWORD=your-password <-- Will be sent by Jacob
+   
+      NEO4J_PASSWORD=your-password <-- Can be provided by Jacob
       NEO4J_DATABASE=neo4j
 
-5. Run the app
-      streamlit run streamlit_app.py
+6. Run the app
+   streamlit run streamlit_app.py
 
 # 📖 Full Documentation
 
