@@ -2,9 +2,9 @@
 
 This project constructs and explores a graph database of Steam games using Neo4j AuraDB and a curated subset of a Kaggle dataset. A lightweight Streamlit web application exposes eight predefined Cypher queries, providing both tabular analytics and interactive graph visualizations.
 
-The focus of this work is graph modelling, import strategy, Cypher query design, and visual reasoning — not the development of a large-scale production system.
+The focus of this work is graph modelling, import strategy, Cypher query design, and visual reasoning; Not the development of a large-scale production system.
 
-# App Deployed Here -->
+# App Deployed Here ->
 NOTE: functional for mobile, but not optimized
 
 https://steamgamesoverview.streamlit.app/
@@ -244,12 +244,15 @@ steamgames_neo4j_streamlit/
       Create a file named .env:
 
       NEO4J_URI=neo4j+s://71308a94.databases.neo4j.io
+   
       NEO4J_USER=neo4j
-      NEO4J_PASSWORD=your-password <-- Will be sent by Jacob
+   
+      NEO4J_PASSWORD=your-password <-- Can be provided by Jacob
+   
       NEO4J_DATABASE=neo4j
 
-5. Run the app
-      streamlit run streamlit_app.py
+6. Run the app
+   streamlit run streamlit_app.py
 
 # 📖 Full Documentation
 
