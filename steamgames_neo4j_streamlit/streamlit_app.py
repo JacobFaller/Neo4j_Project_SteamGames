@@ -204,7 +204,16 @@ elif current_view.startswith("Q3"):
         st.dataframe(df, use_container_width=True)
 
         fig = px.bar(df, x="genre", y="gameCount", title="Games Per Genre")
-        st.plotly_chart(fig, use_container_width=True)
+        fig.update_layout(dragmode="pan")
+        st.plotly_chart(
+                    fig,
+                    use_container_width=True,
+                    config={
+                        "scrollZoom": True,   # enables wheel & pinch zoom
+                        "displayModeBar": True
+                    }
+                )
+
 
 elif current_view.startswith("Q4"):
     st.header("Q4 – Avg Price & Rating per Tag")
@@ -222,7 +231,15 @@ elif current_view.startswith("Q4"):
             hover_name="tag",
             title="Avg Price vs Rating per Tag",
         )
-        st.plotly_chart(fig, use_container_width=True)
+        fig.update_layout(dragmode="pan")
+        st.plotly_chart(
+                    fig,
+                    use_container_width=True,
+                    config={
+                        "scrollZoom": True,   # enables wheel & pinch zoom
+                        "displayModeBar": True
+                    }
+                )
 
 elif current_view.startswith("Q5"):
     st.header("Q5 – Games per Release Year")
@@ -245,8 +262,16 @@ elif current_view.startswith("Q5"):
         else:
             st.subheader("Games per year")
             fig = px.line(df, x="year", y="gameCount", title="Games per Year")
+            fig.update_layout(dragmode="pan")
             fig.update_layout(xaxis_title="Year", yaxis_title="Number of games")
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(
+                    fig,
+                    use_container_width=True,
+                    config={
+                        "scrollZoom": True,   # enables wheel & pinch zoom
+                        "displayModeBar": True
+                    }
+                )
 
 
 # ---------------- GRAPH QUERIES ----------------
