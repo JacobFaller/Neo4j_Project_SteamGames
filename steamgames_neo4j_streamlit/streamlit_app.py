@@ -179,7 +179,7 @@ if current_view == "Home":
 # ---------------- TABLE QUERIES ----------------
 
 if current_view.startswith("Q1"):
-    st.header("Q1 – Game Neighborhood (graph)")
+    st.header("Q1 – Games by Tag")
     st.write("Displays a ranked list of games associated with a selected tag, including their release year, price, rating, and popularity.")
     tag = st.text_input("Tag name", "Adventure")
     if st.button("Run"):
@@ -340,8 +340,9 @@ elif current_view.startswith("Q8"):
 
 
 elif current_view.startswith("Q9"):
-    st.header("Q9 – N-est Games from Source (graph)")
+    st.header("Q9 – The N-est Path (graph)")
     st.write(
+        "The 'N-est'-Path instead of the shortest path, because sometimes life is about the journey, not the destination. You get to decide! \n\n" \
         "From a selected game, finds and visualizes up to five other games that are "
         "exactly **n thematic relationships (tag/genre)** away."
     )
