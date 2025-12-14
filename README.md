@@ -35,7 +35,7 @@ Full Documentation
 
 Source: Steam Games Dataset (Kaggle — Martin Bustos)
 
-Due to AuraDB Free tier limitations (relationship cap ≈ 400k), only a subset of the original CSV was imported. The dataset was split into two UTF-8 parts, and a preliminary filtering stage removed games with zero recommendations (and earlier, those with both zero recommendations and zero rating).
+Due to AuraDB Free tier limitations (relationship cap ≈ 400k), only a subset of the original CSV was imported (extracted from "SteamGames_part_1_UTF8.csv"). The dataset was split into two UTF-8 parts, and a preliminary filtering stage removed games with zero recommendations (and earlier, those with both zero recommendations and zero rating).
 
 Fields used for graph modelling
 
