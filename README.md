@@ -1,6 +1,6 @@
 # Neo4j Steam Games Graph Project
 
-This project constructs and explores a graph database of Steam games using Neo4j AuraDB and a curated subset of a Kaggle dataset. A lightweight Streamlit web application exposes eight predefined Cypher queries, providing both tabular analytics and interactive graph visualizations.
+This project constructs and explores a graph database of Steam games using Neo4j AuraDB and a curated subset of a Kaggle dataset. A lightweight Streamlit web application exposes ten predefined Cypher queries, providing both tabular analytics and interactive graph visualizations.
 
 The focus of this work is graph modelling, import strategy, Cypher query design, and visual reasoning; Not the development of a large-scale production system.
 
@@ -173,7 +173,7 @@ Backend
 
 Official Neo4j Python driver
 
-.env configuration (URI, credentials, DB name)
+.env configuration (URI, credentials, DB name) --> not included in repo though for security
 
 Frontend
 
@@ -189,7 +189,7 @@ All queries run live against the Neo4j AuraDB instance.
 
 # 🔎 Implemented Queries
 
-The app provides eight curated queries that demonstrate different graph reasoning patterns.
+The app provides ten curated queries that demonstrate different graph reasoning patterns.
 
 Q1 – Games by Tag
 
@@ -206,6 +206,10 @@ Q6 – Game Neighborhood
 Q7 – Similar Games via Shared Tags
 
 Q8 – Publisher–Genre Subgraph
+
+Q9 - The N-est Path (find games N nodes distant from source-game)
+
+Q0 – Tag-based Recommendations
 
 All graphs scale to the browser window using Streamlit’s layout="wide" and explicit Plotly height control.
 
