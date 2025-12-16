@@ -33,7 +33,7 @@ Full Documentation
 
 # 📁 Dataset Overview
 
-Source: Steam Games Dataset (Kaggle — Martin Bustos)
+Source: Steam Games Dataset ([Kaggle — Martin Bustos](https://www.kaggle.com/datasets/fronkongames/steam-games-dataset))
 
 Due to AuraDB Free tier limitations (relationship cap ≈ 400k), only a subset of the original CSV was imported (extracted from "SteamGames_part_1_UTF8.csv"). Initially, the dataset was split into two UTF-8 parts, and a preliminary filtering stage removed games with zero recommendations (and earlier, those with both zero recommendations and zero rating). This process is described in detail in the documentation (link at the bottom of this page). 
 
