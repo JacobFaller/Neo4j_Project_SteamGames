@@ -89,7 +89,7 @@ if current_view == "Home":
         This application demonstrates the use of a Neo4j AuraDB graph database to analyze and visualize 
         structural patterns in the Steam games ecosystem.  
         
-        It exposes **eight predefined Cypher queries** that highlight:
+        It exposes **ten predefined Cypher queries** that highlight:
         - table-based analytics
         - statistical charts
         - interactive graph visualizations (neighborhoods, similarity clusters, publisher–genre subgraphs)  
