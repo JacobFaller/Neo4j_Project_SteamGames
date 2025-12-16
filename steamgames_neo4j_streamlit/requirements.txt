@@ -3,5 +3,4 @@ neo4j
 python-dotenv
 pandas
 plotly
-jinja2
 networkx
